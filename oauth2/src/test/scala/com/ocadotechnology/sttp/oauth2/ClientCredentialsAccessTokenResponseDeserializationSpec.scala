@@ -32,48 +32,6 @@ class ClientCredentialsAccessTokenResponseDeserializationSpec extends AnyFlatSpe
     )
   }
 
-  "Token with empty scope" should "not be deserialized" in {
-    val json =
-      // language=JSON
-      json"""{
-            "access_token": "TAeJwlzT",
-            "domain": "zoo",
-            "expires_in": 2399,
-            "scope": "",
-            "token_type": "Bearer"
-        }"""
-
-    json.as[ClientCredentialsToken.AccessTokenResponse].left.value shouldBe a[DecodingFailure]
-  }
-
-  "Token with wildcard scope" should "not be deserialized" in {
-    val json =
-      // language=JSON
-      json"""{
-            "access_token": "TAeJwlzT",
-            "domain": "zoo",
-            "expires_in": 2399,
-            "scope": " ",
-            "token_type": "Bearer"
-        }"""
-
-    json.as[ClientCredentialsToken.AccessTokenResponse].left.value shouldBe a[DecodingFailure]
-  }
-
-  "Token with multiple scopes" should "not be deserialized" in {
-    val json =
-      // language=JSON
-      json"""{
-            "access_token": "TAeJwlzT",
-            "domain": "zoo",
-            "expires_in": 2399,
-            "scope": "scope1 scope2",
-            "token_type": "Bearer"
-        }"""
-
-    json.as[ClientCredentialsToken.AccessTokenResponse].left.value shouldBe a[DecodingFailure]
-  }
-
   "Token with wrong type" should "not be deserialized" in {
     val json =
       // language=JSON
