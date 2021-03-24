@@ -21,14 +21,14 @@ trait AuthorizationCodeProvider[UriType, F[_]] {
     *               @see https://tools.ietf.org/html/rfc6749#page-23
     *  @return instance of UriType, use to redirect user to Oauth2 login page
     */
-  def loginLink(state: Option[String] = None, scope: Set[String]): UriType
+  def loginLink(state: Option[String], scope: Set[String]): UriType
 
   /** Returns logout link for to oauth2 provider
     *
     *  @param postLogoutRedirect Optional override of redirect link. By default uses login redirect link.
     *  @return instance of UriType, use to redirect user to Oauth2 logout page
     */
-  def logoutLink(postLogoutRedirect: Option[UriType] = None): UriType
+  def logoutLink(postLogoutRedirect: Option[UriType]): UriType
 
   /** Returns token details wrapped in effect
     *
@@ -62,7 +62,7 @@ object AuthorizationCodeProvider {
     new AuthorizationCodeProvider[Uri, F] {
       private val tokenUri = baseUrl.addPath("token")
 
-      override def loginLink(state: Option[String] = None, scope: Set[String]): Uri =
+      override def loginLink(state: Option[String], scope: Set[String]): Uri =
         AuthorizationCode
           .loginLink(baseUrl, redirectUri, clientId, state, scope)
 

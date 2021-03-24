@@ -84,8 +84,8 @@ object AuthorizationCode {
     baseUrl: Uri,
     redirectUri: Uri,
     clientId: String,
-    state: Option[String] = None,
-    scopes: Set[String] = Set.empty
+    state: Option[String],
+    scopes: Set[String]
   ): Uri =
     prepareLoginLink(baseUrl, clientId, redirectUri.toString, state.getOrElse(""), scopes)
 
