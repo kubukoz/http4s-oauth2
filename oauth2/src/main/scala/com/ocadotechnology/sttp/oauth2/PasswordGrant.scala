@@ -1,53 +1,44 @@
 package com.kubukoz.ho2
 
-import cats.Functor
-import common._
-import eu.timepit.refined.types.string.NonEmptyString
-import sttp.client3._
-import sttp.model.Uri
-import cats.syntax.all._
+import cats.effect.Concurrent
+import org.http4s.Method.POST
+import org.http4s.Uri
+import org.http4s.circe.CirceEntityCodec._
+import org.http4s.client.Client
+import org.http4s.client.dsl.Http4sClientDsl
+
+import OAuth2Token.bearerTokenResponseDecoder
 
 object PasswordGrant {
 
-  final case class User(name: NonEmptyString, password: Secret[NonEmptyString])
+  final case class User(name: String, password: Secret[String])
 
-  object User {
-
-    // TODO think about error type
-    def of(name: String, password: String): Either[String, User] =
-      for {
-        refinedName     <- NonEmptyString.from(name)
-        refinedPassword <- NonEmptyString.from(password)
-      } yield User(refinedName, Secret(refinedPassword))
-
-  }
-
-  def requestToken[F[_]: Functor](
+  def requestToken[F[_]: Concurrent](
     tokenUri: Uri,
     user: User,
-    clientId: NonEmptyString,
+    clientId: String,
     clientSecret: Secret[String],
-    scope: Scope
+    scope: String
   )(
-    backend: SttpBackend[F, Any]
-  ): F[OAuth2Token.Response] =
-    backend
-      .send {
-        basicRequest
-          .post(tokenUri)
-          .body(requestTokenParams(clientId, user, clientSecret, scope))
-          .response(OAuth2Token.response)
-      }
-      .map(_.body)
+    implicit client: Client[F]
+  ): F[OAuth2Token.Response] = {
+    object dsl extends Http4sClientDsl[F]
+    import dsl._
 
-  private def requestTokenParams(clientId: NonEmptyString, user: User, clientSecret: Secret[String], scope: Scope) =
+    client.expect {
+      POST(tokenUri)
+        .withEntity(requestTokenParams(clientId, user, clientSecret, scope))
+    }
+  }
+
+  private def requestTokenParams(clientId: String, user: User, clientSecret: Secret[String], scope: String) =
     Map(
       "grant_type" -> "password",
-      "username" -> user.name.value,
-      "password" -> user.password.value.value,
-      "client_id" -> clientId.value,
+      "username" -> user.name,
+      "password" -> user.password.value,
+      "client_id" -> clientId,
       "client_secret" -> clientSecret.value,
-      "scope" -> scope.value
+      "scope" -> scope
     )
 
 }

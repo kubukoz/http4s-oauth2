@@ -1,6 +1,5 @@
 package com.kubukoz.ho2
 
-import com.kubukoz.ho2.common._
 import io.circe.DecodingFailure
 import org.scalatest.EitherValues
 import org.scalatest.flatspec.AnyFlatSpec
@@ -28,7 +27,7 @@ class ClientCredentialsAccessTokenResponseDeserializationSpec extends AnyFlatSpe
         accessToken = Secret("TAeJwlzT"),
         domain = "zoo",
         expiresIn = 2399.seconds,
-        scope = Scope.refine("secondapp")
+        scope = "secondapp"
       )
     )
   }

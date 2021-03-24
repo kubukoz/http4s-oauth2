@@ -1,24 +1,19 @@
 package com.kubukoz.ho2
 
 import java.time.Instant
-import com.kubukoz.ho2.common._
-import io.circe.Decoder
-import io.circe.refined._
-import sttp.client3.ResponseAs
+
 import com.kubukoz.ho2.common.Error.OAuth2Error
+import io.circe.Decoder
 
 object Introspection {
 
-  type Response = Either[common.Error, Introspection.TokenIntrospectionResponse]
+  type Response = Either[OAuth2Error, Introspection.TokenIntrospectionResponse]
 
-  private implicit val bearerTokenResponseDecoder: Decoder[Either[OAuth2Error, TokenIntrospectionResponse]] =
+  private[ho2] implicit val bearerTokenResponseDecoder: Decoder[Either[OAuth2Error, TokenIntrospectionResponse]] =
     circe.eitherOrFirstError[TokenIntrospectionResponse, OAuth2Error](
       Decoder[TokenIntrospectionResponse],
       Decoder[OAuth2Error]
     )
-
-  val response: ResponseAs[Response, Any] =
-    common.responseWithCommonError[TokenIntrospectionResponse]
 
   final case class TokenIntrospectionResponse(
     clientId: String,
@@ -26,7 +21,7 @@ object Introspection {
     exp: Instant,
     active: Boolean,
     authorities: List[String],
-    scope: Scope,
+    scope: String,
     tokenType: String
   )
 

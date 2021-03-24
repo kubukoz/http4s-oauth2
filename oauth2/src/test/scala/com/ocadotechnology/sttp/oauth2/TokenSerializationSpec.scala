@@ -1,10 +1,10 @@
 package com.kubukoz.ho2
 
-import org.scalatest.wordspec.AnyWordSpec
+import scala.concurrent.duration.DurationLong
+
 import io.circe.literal._
 import org.scalatest.matchers.should.Matchers
-
-import scala.concurrent.duration.DurationLong
+import org.scalatest.wordspec.AnyWordSpec
 
 class TokenSerializationSpec extends AnyWordSpec with Matchers {
 

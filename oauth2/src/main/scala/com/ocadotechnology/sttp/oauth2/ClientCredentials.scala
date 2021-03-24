@@ -1,12 +1,11 @@
 package com.kubukoz.ho2
 
-import com.kubukoz.ho2.common._
-import eu.timepit.refined.types.string.NonEmptyString
-import sttp.client3.SttpBackend
-import sttp.client3.basicRequest
-import sttp.model.Uri
-import sttp.monad.MonadError
-import sttp.monad.syntax._
+import cats.effect.Concurrent
+import org.http4s.Method.POST
+import org.http4s.Uri
+import org.http4s.circe.CirceEntityCodec._
+import org.http4s.client.Client
+import org.http4s.client.dsl.Http4sClientDsl
 
 object ClientCredentials {
 
@@ -15,31 +14,30 @@ object ClientCredentials {
     *
     * All errors are mapped to [[common.Error]] ADT.
     */
-  def requestToken[F[_]](
+  def requestToken[F[_]: Concurrent](
     tokenUri: Uri,
-    clientId: NonEmptyString,
+    clientId: String,
     clientSecret: Secret[String],
-    scope: Scope
+    scope: String
   )(
-    backend: SttpBackend[F, Any]
+    implicit client: Client[F]
   ): F[ClientCredentialsToken.Response] = {
-    implicit val F: MonadError[F] = backend.responseMonad
-    backend
-      .send {
-        basicRequest
-          .post(tokenUri)
-          .body(requestTokenParams(clientId, clientSecret, scope))
-          .response(ClientCredentialsToken.response)
-      }
-      .map(_.body)
+    object dsl extends Http4sClientDsl[F]
+    import dsl._
+
+    client.expect(
+      POST(
+        tokenUri
+      ).withEntity(requestTokenParams(clientId, clientSecret, scope))
+    )
   }
 
-  private def requestTokenParams(clientId: NonEmptyString, clientSecret: Secret[String], scope: Scope) =
+  private def requestTokenParams(clientId: String, clientSecret: Secret[String], scope: String) =
     Map(
       "grant_type" -> "client_credentials",
-      "client_id" -> clientId.value,
+      "client_id" -> clientId,
       "client_secret" -> clientSecret.value,
-      "scope" -> scope.value
+      "scope" -> scope
     )
 
   /** Introspects provided `token` in OAuth2 provider `tokenIntrospectionUri`, using `clientId` and `clientSecret`.
@@ -47,28 +45,27 @@ object ClientCredentials {
     *
     * Errors are mapped to [[common.Error]] ADT.
     */
-  def introspectToken[F[_]](
+  def introspectToken[F[_]: Concurrent](
     tokenIntrospectionUri: Uri,
-    clientId: NonEmptyString,
+    clientId: String,
     clientSecret: Secret[String],
     token: Secret[String]
   )(
-    backend: SttpBackend[F, Any]
+    implicit client: Client[F]
   ): F[Introspection.Response] = {
-    implicit val F: MonadError[F] = backend.responseMonad
-    backend
-      .send {
-        basicRequest
-          .post(tokenIntrospectionUri)
-          .body(requestTokenIntrospectionParams(clientId, clientSecret, token))
-          .response(Introspection.response)
-      }
-      .map(_.body)
+    object dsl extends Http4sClientDsl[F]
+    import dsl._
+
+    client.expect(
+      POST(
+        tokenIntrospectionUri
+      ).withEntity(requestTokenIntrospectionParams(clientId, clientSecret, token))
+    )
   }
 
-  private def requestTokenIntrospectionParams(clientId: NonEmptyString, clientSecret: Secret[String], token: Secret[String]) =
+  private def requestTokenIntrospectionParams(clientId: String, clientSecret: Secret[String], token: Secret[String]) =
     Map(
-      "client_id" -> clientId.value,
+      "client_id" -> clientId,
       "client_secret" -> clientSecret.value,
       "token" -> token.value
     )

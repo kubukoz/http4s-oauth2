@@ -1,8 +1,8 @@
 package com.kubukoz.ho2
 
-import io.circe.Decoder
-
 import scala.concurrent.duration.FiniteDuration
+
+import io.circe.Decoder
 
 case class Oauth2TokenResponse(
   accessToken: Secret[String],

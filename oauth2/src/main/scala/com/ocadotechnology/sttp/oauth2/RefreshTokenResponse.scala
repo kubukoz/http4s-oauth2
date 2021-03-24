@@ -4,7 +4,7 @@ import io.circe.Decoder
 
 import scala.concurrent.duration.FiniteDuration
 
-private[oauth2] final case class RefreshTokenResponse(
+private[ho2] final case class RefreshTokenResponse(
   accessToken: Secret[String],
   refreshToken: Option[String],
   expiresIn: FiniteDuration,
@@ -35,7 +35,7 @@ private[oauth2] final case class RefreshTokenResponse(
 
 }
 
-private[oauth2] object RefreshTokenResponse {
+private[ho2] object RefreshTokenResponse {
 
   import com.kubukoz.ho2.circe._
 

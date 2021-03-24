@@ -1,14 +1,12 @@
 package com.kubukoz.ho2
 
-import cats.syntax.all._
-import com.kubukoz.ho2.common._
-import eu.timepit.refined.types.string.NonEmptyString
-import sttp.client3.SttpBackend
-import sttp.model.Uri
-import sttp.monad.MonadError
-import sttp.monad.syntax._
+import cats.effect.Concurrent
+import cats.implicits._
+import com.kubukoz.ho2.common.OAuth2Exception
+import org.http4s.Uri
+import org.http4s.client.Client
 
-/** Tagless Final algebra fo ClientCredentials token requests and verification.
+/** Tagless Final algebra for ClientCredentials token requests and verification.
   */
 trait ClientCredentialsProvider[F[_]] {
 
@@ -16,7 +14,7 @@ trait ClientCredentialsProvider[F[_]] {
     *
     * The scope is the scope of the application we want to communicate with.
     */
-  def requestToken(scope: Scope): F[ClientCredentialsToken.AccessTokenResponse]
+  def requestToken(scope: String): F[ClientCredentialsToken.AccessTokenResponse]
 
   /** Introspects passed token in OAuth2 provider.
     *
@@ -32,28 +30,25 @@ object ClientCredentialsProvider {
     *
     * `clientId`, `clientSecret`, `applicationScope` are parameters of your application.
     */
-  def instance[F[_]](
+  def instance[F[_]: Client: Concurrent](
     tokenUrl: Uri,
     tokenIntrospectionUrl: Uri,
-    clientId: NonEmptyString,
+    clientId: String,
     clientSecret: Secret[String]
-  )(
-    implicit backend: SttpBackend[F, Any]
   ): ClientCredentialsProvider[F] =
     new ClientCredentialsProvider[F] {
-      implicit val F: MonadError[F] = backend.responseMonad
 
-      override def requestToken(scope: Scope): F[ClientCredentialsToken.AccessTokenResponse] =
+      override def requestToken(scope: String): F[ClientCredentialsToken.AccessTokenResponse] =
         ClientCredentials
-          .requestToken(tokenUrl, clientId, clientSecret, scope)(backend)
-          .map(_.leftMap(OAuth2Exception).toTry)
-          .flatMap(backend.responseMonad.fromTry)
+          .requestToken[F](tokenUrl, clientId, clientSecret, scope)
+          .map(_.leftMap(OAuth2Exception(_)))
+          .rethrow
 
       override def introspect(token: Secret[String]): F[Introspection.TokenIntrospectionResponse] =
         ClientCredentials
-          .introspectToken(tokenIntrospectionUrl, clientId, clientSecret, token)(backend)
-          .map(_.leftMap(OAuth2Exception).toTry)
-          .flatMap(backend.responseMonad.fromTry)
+          .introspectToken[F](tokenIntrospectionUrl, clientId, clientSecret, token)
+          .map(_.leftMap(OAuth2Exception(_)))
+          .rethrow
 
     }
 

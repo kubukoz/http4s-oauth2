@@ -1,13 +1,12 @@
 package com.kubukoz.ho2
 
+import java.time.Instant
+
 import com.kubukoz.ho2.Introspection.TokenIntrospectionResponse
-import com.kubukoz.ho2.common.Scope
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpec
 import io.circe.literal._
 import org.scalatest.OptionValues
-
-import java.time.Instant
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
 class IntrospectionSerializationSpec extends AnyWordSpec with Matchers with OptionValues {
   "Token" should {
@@ -31,7 +30,7 @@ class IntrospectionSerializationSpec extends AnyWordSpec with Matchers with Opti
           }"""
 
       json.as[TokenIntrospectionResponse] shouldBe Right(
-        TokenIntrospectionResponse(clientId, domain, exp, active, authorities, Scope.of(scope).value, tokenType)
+        TokenIntrospectionResponse(clientId, domain, exp, active, authorities, scope, tokenType)
       )
 
     }

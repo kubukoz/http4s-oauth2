@@ -1,12 +1,14 @@
 package com.kubukoz.ho2
 
-import cats.MonadError
-import cats.syntax.all._
-import eu.timepit.refined.api.Refined
-import eu.timepit.refined.string.Url
-import io.circe.parser.decode
-import sttp.client3._
-import sttp.model.Uri
+import cats.effect.Concurrent
+import org.http4s.AuthScheme
+import org.http4s.Credentials
+import org.http4s.Method.POST
+import org.http4s.Uri
+import org.http4s.circe.CirceEntityCodec._
+import org.http4s.client.Client
+import org.http4s.client.dsl.Http4sClientDsl
+import org.http4s.headers.Authorization
 
 trait UserInfoProvider[F[_]] {
   def userInfo(accessToken: String): F[UserInfo]
@@ -15,35 +17,25 @@ trait UserInfoProvider[F[_]] {
 object UserInfoProvider {
   def apply[F[_]](implicit ev: UserInfoProvider[F]): UserInfoProvider[F] = ev
 
-  private def requestUserInfo[F[_]: MonadError[*[_], Throwable]](
+  private def requestUserInfo[F[_]: Concurrent](
     baseUrl: Uri,
     accessToken: String
   )(
-    implicit backend: SttpBackend[F, Any]
-  ): F[UserInfo] =
-    backend
-      .send {
-        basicRequest
-          .post(baseUrl.withPath("openid", "userinfo"))
-          .header("Authorization", s"Bearer $accessToken")
-          .response(asString)
+    implicit client: Client[F]
+  ): F[UserInfo] = {
+    object dsl extends Http4sClientDsl[F]
+    import dsl._
+
+    client
+      .expect {
+        POST.apply(uri = baseUrl / "openid" / "userinfo", Authorization(Credentials.Token(AuthScheme.Bearer, accessToken)))
       }
-      .map(_.body.leftMap(new RuntimeException(_)).flatMap(decode[UserInfo]))
-      .rethrow
+  }
 
   // TODO - add some description on what is expected of baseUrl
-  def instance[F[_]: MonadError[*[_], Throwable]](
+  def instance[F[_]: Concurrent: Client](
     baseUrl: Uri
-  )(
-    implicit backend: SttpBackend[F, Any]
   ): UserInfoProvider[F] =
     (accessToken: String) => requestUserInfo(baseUrl, accessToken)
-
-  // TODO - add some description on what is expected of baseUrl
-  def instance[F[_]: MonadError[*[_], Throwable]](
-    baseUrl: String Refined Url
-  )(
-    implicit backend: SttpBackend[F, Any]
-  ): UserInfoProvider[F] = instance(common.refinedUrlToUri(baseUrl))
 
 }

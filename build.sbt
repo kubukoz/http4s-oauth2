@@ -1,5 +1,3 @@
-import sbtghactions.UseRef
-
 inThisBuild(
   List(
     organization := "com.kubukoz",
@@ -57,24 +55,6 @@ ThisBuild / githubWorkflowEnv ++= List("PGP_PASSPHRASE", "PGP_SECRET", "SONATYPE
   envKey -> s"$${{ secrets.$envKey }}"
 }.toMap
 
-val Versions = new {
-  val catsCore = "2.4.2"
-  val catsEffect = "2.3.1"
-  val circe = "0.13.0"
-  val kindProjector = "0.11.3"
-  val scalaTest = "3.2.6"
-}
-
-val plugins = Seq(
-  compilerPlugin("org.typelevel" % "kind-projector" % Versions.kindProjector cross CrossVersion.full),
-  compilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
-)
-
-val testDependencies = Seq(
-  "org.scalatest" %% "scalatest" % Versions.scalaTest,
-  "io.circe" %% "circe-literal" % Versions.circe
-).map(_ % Test)
-
 val mimaSettings = mimaPreviousArtifacts := Set(
   // organization.value %% name.value % "0.3.0" // TODO Define a process for resetting this after release
 )
@@ -82,14 +62,15 @@ val mimaSettings = mimaPreviousArtifacts := Set(
 lazy val oauth2 = project.settings(
   name := "http4s-oauth2",
   libraryDependencies ++= Seq(
-    "org.typelevel" %% "cats-core" % Versions.catsCore,
-    "io.circe" %% "circe-core" % Versions.circe,
-    //todo: remove these all
-    //parser built into http4s-circe
-    "io.circe" %% "circe-parser" % Versions.circe,
-    "io.circe" %% "circe-refined" % Versions.circe
-  ) ++ plugins ++ testDependencies,
-  mimaSettings
+    "org.http4s" %% "http4s-circe" % "1.0.0-M19",
+    "org.http4s" %% "http4s-client" % "1.0.0-M19",
+    "io.circe" %% "circe-literal" % "0.14.0-M4" % Test,
+    "org.scalatest" %% "scalatest" % "3.2.6" % Test,
+    compilerPlugin("org.typelevel" % "kind-projector" % "0.11.3" cross CrossVersion.full),
+    compilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
+  ),
+  mimaSettings,
+  scalacOptions -= "-Xfatal-warnings"
 )
 
 val root = project

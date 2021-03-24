@@ -1,49 +1,46 @@
 package com.kubukoz.ho2
 
-import cats.syntax.all._
-import sttp.monad.syntax._
-import sttp.model.Uri
-import sttp.client3._
-import io.circe.parser.decode
-import com.kubukoz.ho2.common._
-import sttp.monad.MonadError
+import cats.effect.Concurrent
+import cats.implicits._
+import org.http4s.Method.POST
+import org.http4s.Uri
+import org.http4s.circe.CirceEntityCodec._
+import org.http4s.client.Client
+import org.http4s.client.dsl.Http4sClientDsl
 
 object AuthorizationCode {
 
-  private def prepareLoginLink(baseUri: Uri, clientId: String, redirectUri: String, state: String, scopes: Set[Scope]): Uri =
-    baseUri
-      .addPath("login")
-      .addParam("response_type", "code")
-      .addParam("client_id", clientId)
-      .addParam("redirect_uri", redirectUri)
-      .addParam("state", state)
-      .addParam("scope", scopes.mkString(" "))
+  private def prepareLoginLink(baseUri: Uri, clientId: String, redirectUri: String, state: String, scopes: Set[String]): Uri =
+    (baseUri / "login")
+      .withQueryParam("response_type", "code")
+      .withQueryParam("client_id", clientId)
+      .withQueryParam("redirect_uri", redirectUri)
+      .withQueryParam("state", state)
+      .withQueryParam("scope", scopes.mkString(" "))
 
   private def prepareLogoutLink(baseUri: Uri, clientId: String, redirectUri: String): Uri =
     baseUri
-      .withPath("logout")
-      .addParam("client_id", clientId)
-      .addParam("redirect_uri", redirectUri)
+      .addPath("logout")
+      .withQueryParam("client_id", clientId)
+      .withQueryParam("redirect_uri", redirectUri)
 
-  private def convertAuthCodeToUser[F[_], UriType](
+  private def convertAuthCodeToUser[F[_]: Concurrent, UriType](
     tokenUri: Uri,
     authCode: String,
     redirectUri: String,
     clientId: String,
     clientSecret: Secret[String]
   )(
-    implicit backend: SttpBackend[F, Any]
+    implicit client: Client[F]
   ): F[Oauth2TokenResponse] = {
-    implicit val F: MonadError[F] = backend.responseMonad
-    backend
-      .send {
-        basicRequest
-          .post(tokenUri)
-          .body(tokenRequestParams(authCode, redirectUri, clientId, clientSecret.value))
-          .response(asString)
+    object dsl extends Http4sClientDsl[F]
+    import dsl._
+
+    client
+      .expect[Oauth2TokenResponse] {
+        POST(tokenUri)
+          .withEntity(tokenRequestParams(authCode, redirectUri, clientId, clientSecret.value))
       }
-      .map(_.body.leftMap(new RuntimeException(_)).flatMap(decode[Oauth2TokenResponse]).toTry)
-      .flatMap(backend.responseMonad.fromTry)
   }
 
   private def tokenRequestParams(authCode: String, redirectUri: String, clientId: String, clientSecret: String) =
@@ -55,26 +52,24 @@ object AuthorizationCode {
       "code" -> authCode
     )
 
-  private def performTokenRefresh[F[_], UriType](
+  private def performTokenRefresh[F[_]: Concurrent, UriType](
     tokenUri: Uri,
     refreshToken: String,
     clientId: String,
     clientSecret: Secret[String],
     scopeOverride: ScopeSelection
   )(
-    implicit backend: SttpBackend[F, Any]
+    implicit client: Client[F]
   ): F[Oauth2TokenResponse] = {
-    implicit val F: MonadError[F] = backend.responseMonad
-    backend
-      .send {
-        basicRequest
-          .post(tokenUri)
-          .body(refreshTokenRequestParams(refreshToken, clientId, clientSecret.value, scopeOverride.toRequestMap))
-          .response(asString)
-      }
-      .map(_.body.leftMap(new RuntimeException(_)).flatMap(decode[RefreshTokenResponse]).toTry)
-      .map(_.map(_.toOauth2Token(refreshToken)))
-      .flatMap(backend.responseMonad.fromTry)
+    object dsl extends Http4sClientDsl[F]
+    import dsl._
+
+    client
+      .expect[RefreshTokenResponse](
+        POST(tokenUri)
+          .withEntity(refreshTokenRequestParams(refreshToken, clientId, clientSecret.value, scopeOverride.toRequestMap))
+      )
+      .map(_.toOauth2Token(refreshToken))
   }
 
   private def refreshTokenRequestParams(refreshToken: String, clientId: String, clientSecret: String, scopeOverride: Map[String, String]) =
@@ -90,18 +85,16 @@ object AuthorizationCode {
     redirectUri: Uri,
     clientId: String,
     state: Option[String] = None,
-    scopes: Set[Scope] = Set.empty
+    scopes: Set[String] = Set.empty
   ): Uri =
     prepareLoginLink(baseUrl, clientId, redirectUri.toString, state.getOrElse(""), scopes)
 
-  def authCodeToToken[F[_]](
+  def authCodeToToken[F[_]: Client: Concurrent](
     tokenUri: Uri,
     redirectUri: Uri,
     clientId: String,
     clientSecret: Secret[String],
     authCode: String
-  )(
-    implicit backend: SttpBackend[F, Any]
   ): F[Oauth2TokenResponse] =
     convertAuthCodeToUser(tokenUri, authCode, redirectUri.toString, clientId, clientSecret)
 
@@ -113,14 +106,12 @@ object AuthorizationCode {
   ): Uri =
     prepareLogoutLink(baseUrl, clientId, postLogoutRedirect.getOrElse(redirectUri).toString())
 
-  def refreshAccessToken[F[_]](
+  def refreshAccessToken[F[_]: Client: Concurrent](
     tokenUri: Uri,
     clientId: String,
     clientSecret: Secret[String],
     refreshToken: String,
     scopeOverride: ScopeSelection = ScopeSelection.KeepExisting
-  )(
-    implicit backend: SttpBackend[F, Any]
   ): F[Oauth2TokenResponse] =
     performTokenRefresh(tokenUri, refreshToken, clientId, clientSecret, scopeOverride)
 

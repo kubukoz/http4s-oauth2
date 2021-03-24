@@ -1,7 +1,5 @@
 package com.kubukoz.ho2
 
-import com.kubukoz.ho2.common.Scope
-
 sealed trait ScopeSelection extends Product with Serializable {
 
   def toRequestMap: Map[String, String] = this match {
@@ -13,5 +11,5 @@ sealed trait ScopeSelection extends Product with Serializable {
 
 object ScopeSelection {
   case object KeepExisting extends ScopeSelection
-  final case class OverrideWith(scopes: Set[Scope]) extends ScopeSelection
+  final case class OverrideWith(scopes: Set[String]) extends ScopeSelection
 }

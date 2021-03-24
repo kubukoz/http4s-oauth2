@@ -1,17 +1,13 @@
 package com.kubukoz.ho2
 
-import eu.timepit.refined.api.Refined
-import eu.timepit.refined.string.Url
-import eu.timepit.refined.refineV
-import sttp.model.Uri
-import sttp.client3._
-import com.kubukoz.ho2.common._
+import cats.effect.Concurrent
+import org.http4s.Uri
+import org.http4s.client.Client
 
 /** Provides set of functions to simplify oauth2 identity provider integration.
   *  Use the `instance` companion object method to create instances.
   *
-  * @tparam UriType type of returned uri. Supported types are:
-  *                 Refined[String, Url] and Uri
+  * @tparam UriType type of returned uri
   * @tparam F effect wrapper
   */
 trait AuthorizationCodeProvider[UriType, F[_]] {
@@ -25,7 +21,7 @@ trait AuthorizationCodeProvider[UriType, F[_]] {
     *               @see https://tools.ietf.org/html/rfc6749#page-23
     *  @return instance of UriType, use to redirect user to Oauth2 login page
     */
-  def loginLink(state: Option[String] = None, scope: Set[Scope] = Set.empty): UriType
+  def loginLink(state: Option[String] = None, scope: Set[String]): UriType
 
   /** Returns logout link for to oauth2 provider
     *
@@ -57,59 +53,16 @@ object AuthorizationCodeProvider {
 
   def apply[U, F[_]](implicit ev: AuthorizationCodeProvider[U, F]): AuthorizationCodeProvider[U, F] = ev
 
-  def refinedInstance[F[_]](
-    baseUrl: Refined[String, Url],
-    redirectUrl: Refined[String, Url],
-    clientId: String,
-    clientSecret: Secret[String]
-  )(
-    implicit backend: SttpBackend[F, Any]
-  ): AuthorizationCodeProvider[Refined[String, Url], F] =
-    new AuthorizationCodeProvider[Refined[String, Url], F] {
-
-      private val baseUri = refinedUrlToUri(baseUrl)
-      private val redirectUri = refinedUrlToUri(redirectUrl)
-      private val tokenUri = baseUri.addPath("token")
-
-      override def loginLink(state: Option[String] = None, scope: Set[Scope] = Set.empty): Refined[String, Url] =
-        refineV[Url].unsafeFrom[String](
-          AuthorizationCode
-            .loginLink(baseUri, redirectUri, clientId, state, scope)
-            .toString
-        )
-
-      override def authCodeToToken(authCode: String): F[Oauth2TokenResponse] =
-        AuthorizationCode
-          .authCodeToToken(tokenUri, redirectUri, clientId, clientSecret, authCode)
-
-      override def logoutLink(postLogoutRedirect: Option[Refined[String, Url]]): Refined[String, Url] =
-        refineV[Url].unsafeFrom[String](
-          AuthorizationCode
-            .logoutLink(baseUri, redirectUri, clientId, postLogoutRedirect.map(refinedUrlToUri))
-            .toString
-        )
-
-      override def refreshAccessToken(
-        refreshToken: String,
-        scopeOverride: ScopeSelection = ScopeSelection.KeepExisting
-      ): F[Oauth2TokenResponse] =
-        AuthorizationCode
-          .refreshAccessToken(tokenUri, clientId, clientSecret, refreshToken, scopeOverride)
-
-    }
-
-  def uriInstance[F[_]](
+  def uriInstance[F[_]: Client: Concurrent](
     baseUrl: Uri,
     redirectUri: Uri,
     clientId: String,
     clientSecret: Secret[String]
-  )(
-    implicit backend: SttpBackend[F, Any]
   ): AuthorizationCodeProvider[Uri, F] =
     new AuthorizationCodeProvider[Uri, F] {
       private val tokenUri = baseUrl.addPath("token")
 
-      override def loginLink(state: Option[String] = None, scope: Set[Scope] = Set.empty): Uri =
+      override def loginLink(state: Option[String] = None, scope: Set[String]): Uri =
         AuthorizationCode
           .loginLink(baseUrl, redirectUri, clientId, state, scope)
 
