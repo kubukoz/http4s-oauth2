@@ -1,4 +1,4 @@
-package com.ocadotechnology.sttp.oauth2
+package com.kubukoz.ho2
 
 import cats.syntax.all._
 import io.circe.literal._

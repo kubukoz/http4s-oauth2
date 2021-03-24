@@ -1,9 +1,9 @@
-import sbtghactions.UseRef
 inThisBuild(
   List(
-    organization := "com.ocadotechnology",
-    homepage := Some(url("https://github.com/ocadotechnology/sttp-oauth2")),
+    organization := "com.kubukoz",
+    homepage := Some(url("https://github.com/kubukoz/http4s-oauth2")),
     licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
+    // Paying respects to upstream devs
     developers := List(
       Developer(
         "majk-p",
@@ -14,7 +14,7 @@ inThisBuild(
       Developer(
         "kubukoz",
         "Jakub Kozłowski",
-        "j.kozlowski@ocado.com",
+        "kubukoz@gmail.com",
         url("https://github.com/kubukoz")
       ),
       Developer(
@@ -30,7 +30,7 @@ inThisBuild(
 
 def crossPlugin(x: sbt.librarymanagement.ModuleID) = compilerPlugin(x.cross(CrossVersion.full))
 
-val Scala212 = "2.12.12"
+val Scala212 = "2.12.13"
 val Scala213 = "2.13.5"
 
 val GraalVM11 = "graalvm-ce-java11@20.3.0"
@@ -46,7 +46,7 @@ ThisBuild / githubWorkflowBuild := Seq(
 ThisBuild / githubWorkflowTargetTags ++= Seq("v*")
 ThisBuild / githubWorkflowPublishTargetBranches := Seq(
   // the default is master - https://github.com/djspiewak/sbt-github-actions/issues/41
-  RefPredicate.Equals(Ref.Branch("main")),
+  // RefPredicate.Equals(Ref.Branch("main")),
   RefPredicate.StartsWith(Ref.Tag("v"))
 )
 ThisBuild / githubWorkflowPublishPreamble := Seq(WorkflowStep.Use(UseRef.Public("olafurpg", "setup-gpg", "v3")))
@@ -55,79 +55,29 @@ ThisBuild / githubWorkflowEnv ++= List("PGP_PASSPHRASE", "PGP_SECRET", "SONATYPE
   envKey -> s"$${{ secrets.$envKey }}"
 }.toMap
 
-val Versions = new {
-  val catsCore = "2.4.2"
-  val catsEffect = "2.3.1"
-  val circe = "0.13.0"
-  val kindProjector = "0.11.3"
-  val monix = "3.3.0"
-  val scalaTest = "3.2.6"
-  val sttp = "3.1.9"
-  val refined = "0.9.21"
-}
-
-val plugins = Seq(
-  compilerPlugin("org.typelevel" % "kind-projector" % Versions.kindProjector cross CrossVersion.full),
-  compilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
-)
-
-val testDependencies = Seq(
-  "org.scalatest" %% "scalatest" % Versions.scalaTest,
-  "io.circe" %% "circe-literal" % Versions.circe
-).map(_ % Test)
-
 val mimaSettings = mimaPreviousArtifacts := Set(
   // organization.value %% name.value % "0.3.0" // TODO Define a process for resetting this after release
 )
 
 lazy val oauth2 = project.settings(
-  name := "sttp-oauth2",
+  name := "http4s-oauth2",
   libraryDependencies ++= Seq(
-    "org.typelevel" %% "cats-core" % Versions.catsCore,
-    "io.circe" %% "circe-parser" % Versions.circe,
-    "io.circe" %% "circe-core" % Versions.circe,
-    "io.circe" %% "circe-refined" % Versions.circe,
-    "com.softwaremill.sttp.client3" %% "core" % Versions.sttp,
-    "com.softwaremill.sttp.client3" %% "circe" % Versions.sttp,
-    "eu.timepit" %% "refined" % Versions.refined
-  ) ++ plugins ++ testDependencies,
-  mimaSettings
+    "org.http4s" %% "http4s-circe" % "1.0.0-M19",
+    "org.http4s" %% "http4s-client" % "1.0.0-M19",
+    "io.circe" %% "circe-literal" % "0.14.0-M4" % Test,
+    "org.scalatest" %% "scalatest" % "3.2.6" % Test,
+    compilerPlugin("org.typelevel" % "kind-projector" % "0.11.3" cross CrossVersion.full),
+    compilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
+  ),
+  mimaSettings,
+  scalacOptions -= "-Xfatal-warnings"
 )
-
-lazy val `oauth2-backend-common` = project
-  .settings(
-    name := "sttp-oauth2-backend-common",
-    mimaSettings
-  )
-  .dependsOn(oauth2)
-
-lazy val `oauth2-backend-cats` = project
-  .settings(
-    name := "sttp-oauth2-backend-cats",
-    libraryDependencies ++= Seq(
-      "org.typelevel" %% "cats-effect" % Versions.catsEffect,
-      "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats" % Versions.sttp % Test
-    ) ++ plugins ++ testDependencies,
-    mimaSettings
-  )
-  .dependsOn(`oauth2-backend-common`)
-
-lazy val `oauth2-backend-future` = project
-  .settings(
-    name := "sttp-oauth2-backend-future",
-    libraryDependencies ++= Seq(
-      "io.monix" %% "monix-execution" % Versions.monix,
-      "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % Versions.sttp % Test
-    ) ++ plugins ++ testDependencies,
-    mimaSettings
-  )
-  .dependsOn(`oauth2-backend-common`)
 
 val root = project
   .in(file("."))
   .settings(
-    skip in publish := true,
+    publish / skip := true,
     mimaPreviousArtifacts := Set.empty
   )
   // after adding a module remember to regenerate ci.yml using `sbt githubWorkflowGenerate`
-  .aggregate(oauth2, `oauth2-backend-common`, `oauth2-backend-cats`, `oauth2-backend-future`)
+  .aggregate(oauth2)

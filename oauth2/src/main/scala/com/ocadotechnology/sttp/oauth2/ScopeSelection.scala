@@ -1,6 +1,4 @@
-package com.ocadotechnology.sttp.oauth2
-
-import com.ocadotechnology.sttp.oauth2.common.Scope
+package com.kubukoz.ho2
 
 sealed trait ScopeSelection extends Product with Serializable {
 
@@ -13,5 +11,5 @@ sealed trait ScopeSelection extends Product with Serializable {
 
 object ScopeSelection {
   case object KeepExisting extends ScopeSelection
-  final case class OverrideWith(scopes: Set[Scope]) extends ScopeSelection
+  final case class OverrideWith(scopes: Set[String]) extends ScopeSelection
 }

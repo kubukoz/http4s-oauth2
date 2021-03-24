@@ -1,36 +1,31 @@
-package com.ocadotechnology.sttp.oauth2
-
-import com.ocadotechnology.sttp.oauth2.common._
-import io.circe.Decoder
-import io.circe.refined._
-import sttp.client3.ResponseAs
-import com.ocadotechnology.sttp.oauth2.common.Error.OAuth2Error
+package com.kubukoz.ho2
 
 import scala.concurrent.duration.FiniteDuration
 
+import com.kubukoz.ho2.common.Error.OAuth2Error
+import io.circe.Decoder
+
 object ClientCredentialsToken {
 
-  type Response = Either[Error, ClientCredentialsToken.AccessTokenResponse]
+  //this should be ADTed really
+  type Response = Either[OAuth2Error, ClientCredentialsToken.AccessTokenResponse]
 
-  private[oauth2] implicit val bearerTokenResponseDecoder: Decoder[Either[OAuth2Error, AccessTokenResponse]] =
+  private[ho2] implicit val bearerTokenResponseDecoder: Decoder[Either[OAuth2Error, AccessTokenResponse]] =
     circe.eitherOrFirstError[AccessTokenResponse, OAuth2Error](
       Decoder[AccessTokenResponse],
       Decoder[OAuth2Error]
     )
 
-  val response: ResponseAs[Response, Any] =
-    common.responseWithCommonError[ClientCredentialsToken.AccessTokenResponse]
-
   final case class AccessTokenResponse(
     accessToken: Secret[String],
     domain: String,
     expiresIn: FiniteDuration,
-    scope: Scope
+    scope: String
   )
 
   object AccessTokenResponse {
 
-    import com.ocadotechnology.sttp.oauth2.circe._
+    import com.kubukoz.ho2.circe._
 
     implicit val tokenDecoder: Decoder[AccessTokenResponse] =
       Decoder

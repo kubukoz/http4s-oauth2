@@ -1,8 +1,8 @@
-package com.ocadotechnology.sttp.oauth2
-
-import io.circe.Decoder
+package com.kubukoz.ho2
 
 import scala.concurrent.duration.FiniteDuration
+
+import io.circe.Decoder
 
 case class Oauth2TokenResponse(
   accessToken: Secret[String],
@@ -19,7 +19,7 @@ case class Oauth2TokenResponse(
 )
 
 object Oauth2TokenResponse {
-  import com.ocadotechnology.sttp.oauth2.circe._
+  import com.kubukoz.ho2.circe._
 
   implicit val decoder: Decoder[Oauth2TokenResponse] =
     Decoder.forProduct11(

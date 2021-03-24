@@ -1,6 +1,5 @@
-package com.ocadotechnology.sttp.oauth2
+package com.kubukoz.ho2
 
-import com.ocadotechnology.sttp.oauth2.common._
 import io.circe.DecodingFailure
 import org.scalatest.EitherValues
 import org.scalatest.flatspec.AnyFlatSpec
@@ -28,51 +27,9 @@ class ClientCredentialsAccessTokenResponseDeserializationSpec extends AnyFlatSpe
         accessToken = Secret("TAeJwlzT"),
         domain = "zoo",
         expiresIn = 2399.seconds,
-        scope = Scope.refine("secondapp")
+        scope = "secondapp"
       )
     )
-  }
-
-  "Token with empty scope" should "not be deserialized" in {
-    val json =
-      // language=JSON
-      json"""{
-            "access_token": "TAeJwlzT",
-            "domain": "zoo",
-            "expires_in": 2399,
-            "scope": "",
-            "token_type": "Bearer"
-        }"""
-
-    json.as[ClientCredentialsToken.AccessTokenResponse].left.value shouldBe a[DecodingFailure]
-  }
-
-  "Token with wildcard scope" should "not be deserialized" in {
-    val json =
-      // language=JSON
-      json"""{
-            "access_token": "TAeJwlzT",
-            "domain": "zoo",
-            "expires_in": 2399,
-            "scope": " ",
-            "token_type": "Bearer"
-        }"""
-
-    json.as[ClientCredentialsToken.AccessTokenResponse].left.value shouldBe a[DecodingFailure]
-  }
-
-  "Token with multiple scopes" should "not be deserialized" in {
-    val json =
-      // language=JSON
-      json"""{
-            "access_token": "TAeJwlzT",
-            "domain": "zoo",
-            "expires_in": 2399,
-            "scope": "scope1 scope2",
-            "token_type": "Bearer"
-        }"""
-
-    json.as[ClientCredentialsToken.AccessTokenResponse].left.value shouldBe a[DecodingFailure]
   }
 
   "Token with wrong type" should "not be deserialized" in {
