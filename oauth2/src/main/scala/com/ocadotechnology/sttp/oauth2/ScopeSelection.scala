@@ -1,6 +1,6 @@
-package com.ocadotechnology.sttp.oauth2
+package com.kubukoz.ho2
 
-import com.ocadotechnology.sttp.oauth2.common.Scope
+import com.kubukoz.ho2.common.Scope
 
 sealed trait ScopeSelection extends Product with Serializable {
 

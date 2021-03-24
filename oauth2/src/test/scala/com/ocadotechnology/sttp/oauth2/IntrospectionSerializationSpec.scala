@@ -1,7 +1,7 @@
-package com.ocadotechnology.sttp.oauth2
+package com.kubukoz.ho2
 
-import com.ocadotechnology.sttp.oauth2.Introspection.TokenIntrospectionResponse
-import com.ocadotechnology.sttp.oauth2.common.Scope
+import com.kubukoz.ho2.Introspection.TokenIntrospectionResponse
+import com.kubukoz.ho2.common.Scope
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import io.circe.literal._

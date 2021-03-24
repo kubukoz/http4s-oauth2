@@ -1,4 +1,4 @@
-package com.ocadotechnology.sttp.oauth2
+package com.kubukoz.ho2
 
 import io.circe.Decoder
 
@@ -37,7 +37,7 @@ private[oauth2] final case class RefreshTokenResponse(
 
 private[oauth2] object RefreshTokenResponse {
 
-  import com.ocadotechnology.sttp.oauth2.circe._
+  import com.kubukoz.ho2.circe._
 
   implicit val decoder: Decoder[RefreshTokenResponse] =
     Decoder.forProduct11(

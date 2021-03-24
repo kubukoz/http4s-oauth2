@@ -1,11 +1,11 @@
-package com.ocadotechnology.sttp.oauth2
+package com.kubukoz.ho2
 
 import cats.syntax.all._
 import sttp.monad.syntax._
 import sttp.model.Uri
 import sttp.client3._
 import io.circe.parser.decode
-import com.ocadotechnology.sttp.oauth2.common._
+import com.kubukoz.ho2.common._
 import sttp.monad.MonadError
 
 object AuthorizationCode {

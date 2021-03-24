@@ -1,11 +1,11 @@
-package com.ocadotechnology.sttp.oauth2
+package com.kubukoz.ho2
 
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.string.Url
 import eu.timepit.refined.refineV
 import sttp.model.Uri
 import sttp.client3._
-import com.ocadotechnology.sttp.oauth2.common._
+import com.kubukoz.ho2.common._
 
 /** Provides set of functions to simplify oauth2 identity provider integration.
   *  Use the `instance` companion object method to create instances.

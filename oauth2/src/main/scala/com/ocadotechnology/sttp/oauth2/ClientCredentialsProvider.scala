@@ -1,7 +1,7 @@
-package com.ocadotechnology.sttp.oauth2
+package com.kubukoz.ho2
 
 import cats.syntax.all._
-import com.ocadotechnology.sttp.oauth2.common._
+import com.kubukoz.ho2.common._
 import eu.timepit.refined.types.string.NonEmptyString
 import sttp.client3.SttpBackend
 import sttp.model.Uri

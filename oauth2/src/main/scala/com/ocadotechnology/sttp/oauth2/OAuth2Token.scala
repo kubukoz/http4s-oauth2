@@ -1,9 +1,9 @@
-package com.ocadotechnology.sttp.oauth2
+package com.kubukoz.ho2
 
-import com.ocadotechnology.sttp.oauth2.common.Error
+import com.kubukoz.ho2.common.Error
 import io.circe.Decoder
 import sttp.client3.ResponseAs
-import com.ocadotechnology.sttp.oauth2.common.Error.OAuth2Error
+import com.kubukoz.ho2.common.Error.OAuth2Error
 
 object OAuth2Token {
 

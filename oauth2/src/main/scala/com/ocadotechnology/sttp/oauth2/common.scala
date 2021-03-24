@@ -1,13 +1,13 @@
-package com.ocadotechnology.sttp.oauth2
+package com.kubukoz.ho2
 
 import cats.syntax.all._
-import com.ocadotechnology.sttp.oauth2.common.Error.OAuth2Error
-import com.ocadotechnology.sttp.oauth2.common.Error.OAuth2ErrorResponse.InvalidClient
-import com.ocadotechnology.sttp.oauth2.common.Error.OAuth2ErrorResponse.InvalidGrant
-import com.ocadotechnology.sttp.oauth2.common.Error.OAuth2ErrorResponse.InvalidRequest
-import com.ocadotechnology.sttp.oauth2.common.Error.OAuth2ErrorResponse.InvalidScope
-import com.ocadotechnology.sttp.oauth2.common.Error.OAuth2ErrorResponse.UnauthorizedClient
-import com.ocadotechnology.sttp.oauth2.common.Error.OAuth2ErrorResponse.UnsupportedGrantType
+import com.kubukoz.ho2.common.Error.OAuth2Error
+import com.kubukoz.ho2.common.Error.OAuth2ErrorResponse.InvalidClient
+import com.kubukoz.ho2.common.Error.OAuth2ErrorResponse.InvalidGrant
+import com.kubukoz.ho2.common.Error.OAuth2ErrorResponse.InvalidRequest
+import com.kubukoz.ho2.common.Error.OAuth2ErrorResponse.InvalidScope
+import com.kubukoz.ho2.common.Error.OAuth2ErrorResponse.UnauthorizedClient
+import com.kubukoz.ho2.common.Error.OAuth2ErrorResponse.UnsupportedGrantType
 import eu.timepit.refined._
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.api.Validate

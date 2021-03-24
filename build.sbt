@@ -1,9 +1,11 @@
 import sbtghactions.UseRef
+
 inThisBuild(
   List(
-    organization := "com.ocadotechnology",
-    homepage := Some(url("https://github.com/ocadotechnology/sttp-oauth2")),
+    organization := "com.kubukoz",
+    homepage := Some(url("https://github.com/kubukoz/http4s-oauth2")),
     licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
+    // Paying respects to upstream devs
     developers := List(
       Developer(
         "majk-p",
@@ -14,7 +16,7 @@ inThisBuild(
       Developer(
         "kubukoz",
         "Jakub Kozłowski",
-        "j.kozlowski@ocado.com",
+        "kubukoz@gmail.com",
         url("https://github.com/kubukoz")
       ),
       Developer(
@@ -30,7 +32,7 @@ inThisBuild(
 
 def crossPlugin(x: sbt.librarymanagement.ModuleID) = compilerPlugin(x.cross(CrossVersion.full))
 
-val Scala212 = "2.12.12"
+val Scala212 = "2.12.13"
 val Scala213 = "2.13.5"
 
 val GraalVM11 = "graalvm-ce-java11@20.3.0"
@@ -60,10 +62,7 @@ val Versions = new {
   val catsEffect = "2.3.1"
   val circe = "0.13.0"
   val kindProjector = "0.11.3"
-  val monix = "3.3.0"
   val scalaTest = "3.2.6"
-  val sttp = "3.1.9"
-  val refined = "0.9.21"
 }
 
 val plugins = Seq(
@@ -81,53 +80,23 @@ val mimaSettings = mimaPreviousArtifacts := Set(
 )
 
 lazy val oauth2 = project.settings(
-  name := "sttp-oauth2",
+  name := "http4s-oauth2",
   libraryDependencies ++= Seq(
     "org.typelevel" %% "cats-core" % Versions.catsCore,
-    "io.circe" %% "circe-parser" % Versions.circe,
     "io.circe" %% "circe-core" % Versions.circe,
-    "io.circe" %% "circe-refined" % Versions.circe,
-    "com.softwaremill.sttp.client3" %% "core" % Versions.sttp,
-    "com.softwaremill.sttp.client3" %% "circe" % Versions.sttp,
-    "eu.timepit" %% "refined" % Versions.refined
+    //todo: remove these all
+    //parser built into http4s-circe
+    "io.circe" %% "circe-parser" % Versions.circe,
+    "io.circe" %% "circe-refined" % Versions.circe
   ) ++ plugins ++ testDependencies,
   mimaSettings
 )
 
-lazy val `oauth2-backend-common` = project
-  .settings(
-    name := "sttp-oauth2-backend-common",
-    mimaSettings
-  )
-  .dependsOn(oauth2)
-
-lazy val `oauth2-backend-cats` = project
-  .settings(
-    name := "sttp-oauth2-backend-cats",
-    libraryDependencies ++= Seq(
-      "org.typelevel" %% "cats-effect" % Versions.catsEffect,
-      "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats" % Versions.sttp % Test
-    ) ++ plugins ++ testDependencies,
-    mimaSettings
-  )
-  .dependsOn(`oauth2-backend-common`)
-
-lazy val `oauth2-backend-future` = project
-  .settings(
-    name := "sttp-oauth2-backend-future",
-    libraryDependencies ++= Seq(
-      "io.monix" %% "monix-execution" % Versions.monix,
-      "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % Versions.sttp % Test
-    ) ++ plugins ++ testDependencies,
-    mimaSettings
-  )
-  .dependsOn(`oauth2-backend-common`)
-
 val root = project
   .in(file("."))
   .settings(
-    skip in publish := true,
+    publish / skip := true,
     mimaPreviousArtifacts := Set.empty
   )
   // after adding a module remember to regenerate ci.yml using `sbt githubWorkflowGenerate`
-  .aggregate(oauth2, `oauth2-backend-common`, `oauth2-backend-cats`, `oauth2-backend-future`)
+  .aggregate(oauth2)

@@ -1,4 +1,4 @@
-package com.ocadotechnology.sttp.oauth2
+package com.kubukoz.ho2
 
 import org.scalatest.wordspec.AnyWordSpec
 import io.circe.literal._

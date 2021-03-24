@@ -1,10 +1,10 @@
-package com.ocadotechnology.sttp.oauth2
+package com.kubukoz.ho2
 
-import com.ocadotechnology.sttp.oauth2.common._
+import com.kubukoz.ho2.common._
 import io.circe.Decoder
 import io.circe.refined._
 import sttp.client3.ResponseAs
-import com.ocadotechnology.sttp.oauth2.common.Error.OAuth2Error
+import com.kubukoz.ho2.common.Error.OAuth2Error
 
 import scala.concurrent.duration.FiniteDuration
 
@@ -30,7 +30,7 @@ object ClientCredentialsToken {
 
   object AccessTokenResponse {
 
-    import com.ocadotechnology.sttp.oauth2.circe._
+    import com.kubukoz.ho2.circe._
 
     implicit val tokenDecoder: Decoder[AccessTokenResponse] =
       Decoder

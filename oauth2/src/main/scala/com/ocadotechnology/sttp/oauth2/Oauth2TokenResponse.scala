@@ -1,4 +1,4 @@
-package com.ocadotechnology.sttp.oauth2
+package com.kubukoz.ho2
 
 import io.circe.Decoder
 
@@ -19,7 +19,7 @@ case class Oauth2TokenResponse(
 )
 
 object Oauth2TokenResponse {
-  import com.ocadotechnology.sttp.oauth2.circe._
+  import com.kubukoz.ho2.circe._
 
   implicit val decoder: Decoder[Oauth2TokenResponse] =
     Decoder.forProduct11(

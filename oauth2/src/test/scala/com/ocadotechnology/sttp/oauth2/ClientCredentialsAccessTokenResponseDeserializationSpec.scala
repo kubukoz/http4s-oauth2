@@ -1,6 +1,6 @@
-package com.ocadotechnology.sttp.oauth2
+package com.kubukoz.ho2
 
-import com.ocadotechnology.sttp.oauth2.common._
+import com.kubukoz.ho2.common._
 import io.circe.DecodingFailure
 import org.scalatest.EitherValues
 import org.scalatest.flatspec.AnyFlatSpec

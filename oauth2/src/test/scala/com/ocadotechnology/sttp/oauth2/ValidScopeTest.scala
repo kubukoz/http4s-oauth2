@@ -1,7 +1,7 @@
-package com.ocadotechnology.sttp.oauth2
+package com.kubukoz.ho2
 
-import com.ocadotechnology.sttp.oauth2.common.Scope
-import com.ocadotechnology.sttp.oauth2.common.ValidScope
+import com.kubukoz.ho2.common.Scope
+import com.kubukoz.ho2.common.ValidScope
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import eu.timepit.refined._

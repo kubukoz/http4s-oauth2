@@ -1,8 +1,8 @@
-package com.ocadotechnology.sttp.oauth2
+package com.kubukoz.ho2
 
 import cats.MonadError
 import common._
-import com.ocadotechnology.sttp.oauth2.PasswordGrant.User
+import com.kubukoz.ho2.PasswordGrant.User
 import eu.timepit.refined.types.string.NonEmptyString
 import sttp.client3.SttpBackend
 import sttp.model.Uri

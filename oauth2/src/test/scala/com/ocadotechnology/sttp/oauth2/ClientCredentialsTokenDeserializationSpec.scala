@@ -1,15 +1,15 @@
-package com.ocadotechnology.sttp.oauth2
+package com.kubukoz.ho2
 
-import com.ocadotechnology.sttp.oauth2.ClientCredentialsToken.AccessTokenResponse
-import com.ocadotechnology.sttp.oauth2.common.Error.OAuth2ErrorResponse.InvalidClient
-import com.ocadotechnology.sttp.oauth2.common._
+import com.kubukoz.ho2.ClientCredentialsToken.AccessTokenResponse
+import com.kubukoz.ho2.common.Error.OAuth2ErrorResponse.InvalidClient
+import com.kubukoz.ho2.common._
 import io.circe.DecodingFailure
 import io.circe.literal._
 import org.scalatest.EitherValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import com.ocadotechnology.sttp.oauth2.common.Error.OAuth2Error
-import com.ocadotechnology.sttp.oauth2.common.Error.OAuth2ErrorResponse
+import com.kubukoz.ho2.common.Error.OAuth2Error
+import com.kubukoz.ho2.common.Error.OAuth2ErrorResponse
 
 import scala.concurrent.duration._
 
