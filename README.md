@@ -1,6 +1,8 @@
-# sttp-oauth2 - OAuth2 client library for Scala
+# httpt4s-oauth2 - OAuth2 client library for http4s
 
-This library aims to provide easy integration with OAuth2 providers based on [OAuth2 RFC](https://tools.ietf.org/html/rfc6749) using [sttp](https://github.com/softwaremill/sttp) client. It uses [circe](https://github.com/circe/circe) for JSON serialization/deserialization.
+This is a fork of [ocadotechnology/sttp-oauth2](https://github.com/ocadotechnology/sttp-oauth2), adjusted to support http4s directly without going through sttp.
+
+This library aims to provide easy integration with OAuth2 providers based on [OAuth2 RFC](https://tools.ietf.org/html/rfc6749) using [http4s](https://github.com/http4s/http4s) client. It uses [circe](https://github.com/circe/circe) for JSON serialization/deserialization.
 
 Currently it supports methods (grant types) for obtaining authorization:
  - [Authorization code](https://tools.ietf.org/html/rfc6749#section-4.1)
@@ -10,10 +12,10 @@ Currently it supports methods (grant types) for obtaining authorization:
 
 ## Usage
 
-### `sttp-oauth2`
+### `http4s-oauth2`
 
-Each grant is implemented in an object with explicit return and error types on methods and additionally, TaglessFinal friendly `*Provider` interface.
-- `AuthorizationCode` and `AuthorizationCodeProvider` - provide functionality for: 
+Each grant is implemented in an object with explicit return and error types on methods and additionally, Tagless Final friendly `*Provider` interface.
+- `AuthorizationCode` and `AuthorizationCodeProvider` - provide functionality for:
   - generating _login_ and _logout_ redirect links,
   - `authCodeToToken` for converting authorization code to token,
   - `refreshAccessToken` for performing a token refresh request
@@ -22,29 +24,15 @@ Each grant is implemented in an object with explicit return and error types on m
   - Obtain token via `requestToken`
   - `introspect` the token for it's details like `UserInfo`
 
-### `sttp-oauth2` backends
-
-- provide Client Credentials Backend, which is an interceptor for another backend and which can:
-  - fetch a token using ClientCredentialsProvider
-  - reuse the token multiple times using cache (default cache implementation may be overridden using appropriate constructor functions)
-  - fetch a new token if the previous one expires
-  - add an Authorization header to the intercepted request
-
-Implementations:
-
-| module name                  | class name                                 | default cache implementation    | semaphore                            | notes                                           |
-|------------------------------|--------------------------------------------|---------------------------------|--------------------------------------|-------------------------------------------------|
-| `sttp-oauth2-backend-cats`   | `SttpOauth2ClientCredentialsCatsBackend`   | `cats-effect`'s `Ref`           | `cats-effect`'s `Semaphore`          |                                                 |
-| `sttp-oauth2-backend-future` | `SttpOauth2ClientCredentialsFutureBackend` | `monix-execution`'s `AtomicAny` | `monix-execution`'s `AsyncSemaphore` | It only uses submodule of whole `monix` project |
-
-The library is using sttp 3. The latest version which is using sttp 2 is `0.4.0`.
-
 ## Contributing
 
 Feel free to submit feature requests and bug reports under Issues.
 
 ## License
 
+http4s-oauth2 is licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0) (the "License"); you may not use this software except in compliance with the License.
+
 sttp-oauth2 is licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0) (the "License"); you may not use this software except in compliance with the License.
 
+Copyright © 2021 Jakub Kozłowski
 Copyright © 2020 Ocado
