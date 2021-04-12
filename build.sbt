@@ -33,14 +33,14 @@ def crossPlugin(x: sbt.librarymanagement.ModuleID) = compilerPlugin(x.cross(Cros
 val Scala212 = "2.12.13"
 val Scala213 = "2.13.5"
 
-val GraalVM11 = "graalvm-ce-java11@20.3.0"
+val GraalVM11 = "graalvm-ce-java11@21.0.0"
 
 ThisBuild / scalaVersion := Scala213
 ThisBuild / crossScalaVersions := Seq(Scala212, Scala213)
 ThisBuild / githubWorkflowJavaVersions := Seq(GraalVM11)
 ThisBuild / githubWorkflowBuild := Seq(
   WorkflowStep.Sbt(List("test", "mimaReportBinaryIssues"))
-) // NOTE those run separately for every ScalaVersion in `crossScalaVersions`
+)
 
 //sbt-ci-release settings
 ThisBuild / githubWorkflowTargetTags ++= Seq("v*")
@@ -62,9 +62,9 @@ val mimaSettings = mimaPreviousArtifacts := Set(
 lazy val oauth2 = project.settings(
   name := "http4s-oauth2",
   libraryDependencies ++= Seq(
-    "org.http4s" %% "http4s-circe" % "1.0.0-M19",
-    "org.http4s" %% "http4s-client" % "1.0.0-M19",
-    "io.circe" %% "circe-literal" % "0.14.0-M4" % Test,
+    "org.http4s" %% "http4s-circe" % "1.0.0-M21",
+    "org.http4s" %% "http4s-client" % "1.0.0-M21",
+    "io.circe" %% "circe-literal" % "0.14.0-M5" % Test,
     "org.scalatest" %% "scalatest" % "3.2.6" % Test,
     compilerPlugin("org.typelevel" % "kind-projector" % "0.11.3" cross CrossVersion.full),
     compilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
